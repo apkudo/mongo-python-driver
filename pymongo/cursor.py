@@ -246,7 +246,7 @@ class Cursor(object):
         # Checking spec.keys()[0] covers the case that the spec
         # was passed as an instance of SON or OrderedDict.
         elif ("query" in self.__spec and
-              (len(self.__spec) == 1 or self.__spec.keys()[0] == "query")):
+              (len(self.__spec) == 1 or list(self.__spec.keys())[0] == "query")):
                 return SON({"$query": self.__spec})
 
         return self.__spec
@@ -363,7 +363,7 @@ class Cursor(object):
         :Parameters:
           - `skip`: the number of results to skip
         """
-        if not isinstance(skip, (int, long)):
+        if not isinstance(skip, int):
             raise TypeError("skip must be an int")
         self.__check_okay_to_chain()
 
@@ -426,7 +426,7 @@ class Cursor(object):
             self.__limit = limit
             return self
 
-        if isinstance(index, (int, long)):
+        if isinstance(index, int):
             if index < 0:
                 raise IndexError("Cursor instances do not support negative"
                                  "indices")
@@ -557,9 +557,9 @@ class Cursor(object):
 
         .. versionadded:: 1.2
         """
-        if not isinstance(key, basestring):
+        if not isinstance(key, str):
             raise TypeError("key must be an instance "
-                            "of %s" % (basestring.__name__,))
+                            "of %s" % (str.__name__,))
 
         options = {"key": key}
         if self.__spec:
@@ -590,7 +590,7 @@ class Cursor(object):
         # always use a hard limit for explains
         if c.__limit:
             c.__limit = -abs(c.__limit)
-        return c.next()
+        return next(c)
 
     def hint(self, index):
         """Adds a 'hint', telling Mongo the proper index to use for the query.
@@ -771,7 +771,7 @@ class Cursor(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.__empty:
             raise StopIteration
         db = self.__collection.database

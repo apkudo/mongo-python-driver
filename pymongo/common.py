@@ -31,7 +31,7 @@ def validate_boolean(option, value):
     """
     if isinstance(value, bool):
         return value
-    elif isinstance(value, basestring):
+    elif isinstance(value, str):
         if value not in ('true', 'false'):
             raise ConfigurationError("The value of %s must be "
                                      "'true' or 'false'" % (option,))
@@ -42,9 +42,9 @@ def validate_boolean(option, value):
 def validate_integer(option, value):
     """Validates that 'value' is an integer (or basestring representation).
     """
-    if isinstance(value, (int, long)):
+    if isinstance(value, int):
         return value
-    elif isinstance(value, basestring):
+    elif isinstance(value, str):
         if not value.isdigit():
             raise ConfigurationError("The value of %s must be "
                                      "an integer" % (option,))
@@ -65,18 +65,18 @@ def validate_positive_integer(option, value):
 def validate_basestring(option, value):
     """Validates that 'value' is an instance of `basestring`.
     """
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         return value
     raise TypeError("Wrong type for %s, value must be an "
-                    "instance of %s" % (option, basestring.__name__))
+                    "instance of %s" % (option, str.__name__))
 
 
 def validate_int_or_basestring(option, value):
     """Validates that 'value' is an integer or string.
     """
-    if isinstance(value, (int, long)):
+    if isinstance(value, int):
         return value
-    elif isinstance(value, basestring):
+    elif isinstance(value, str):
         if value.isdigit():
             return int(value)
         return value
@@ -226,7 +226,7 @@ class BaseObject(object):
 
     def __set_options(self, options):
         """Validates and sets all options passed to this object."""
-        for option, value in options.iteritems():
+        for option, value in options.items():
             if option in ('slave_okay', 'slaveok'):
                 self.__slave_okay = validate_boolean(option, value)
             elif option == 'read_preference':
@@ -353,7 +353,7 @@ class BaseObject(object):
 
         .. versionadded:: 2.0
         """
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             self.__set_safe_option(key, value, check=True)
 
     def unset_lasterror_options(self, *options):

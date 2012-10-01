@@ -80,7 +80,7 @@ def insert(collection_name, docs, check_keys,
     encoded = [bson.BSON.encode(doc, check_keys, uuid_subtype) for doc in docs]
     if not encoded:
         raise InvalidOperation("cannot do an empty bulk insert")
-    max_bson_size = max(map(len, encoded))
+    max_bson_size = max(list(map(len, encoded)))
     data += EMPTY.join(encoded)
     if safe:
         (_, insert_message) = __pack_message(2002, data)

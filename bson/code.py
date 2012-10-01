@@ -40,9 +40,9 @@ class Code(str):
     """
 
     def __new__(cls, code, scope=None, **kwargs):
-        if not isinstance(code, basestring):
+        if not isinstance(code, str):
             raise TypeError("code must be an "
-                            "instance of %s" % (basestring.__name__,))
+                            "instance of %s" % (str.__name__,))
 
         self = str.__new__(cls, code)
 

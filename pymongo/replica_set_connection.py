@@ -228,7 +228,7 @@ class Member(object):
            tags. E.g., if this member is tagged {'dc': 'ny', 'rack': '1'},
            then it matches {'dc': 'ny'}.
         """
-        for key, value in tags.items():
+        for key, value in list(tags.items()):
             if key not in self.tags or self.tags[key] != value:
                 return False
 
@@ -407,7 +407,7 @@ class ReplicaSetConnection(common.BaseObject):
         else:
             self.__seeds.update(uri_parser.split_hosts(host, port))
 
-        for option, value in kwargs.iteritems():
+        for option, value in kwargs.items():
             option, value = common.validate(option, value)
             self.__opts[option] = value
 
@@ -543,7 +543,7 @@ class ReplicaSetConnection(common.BaseObject):
         this database is authenticated, since this gives global access.
         """
         authset = sock_info.authset
-        names = set(self.__auth_credentials.iterkeys())
+        names = set(self.__auth_credentials.keys())
 
         # Logout from any databases no longer listed in the credentials cache.
         for dbname in authset - names:
@@ -804,7 +804,7 @@ class ReplicaSetConnection(common.BaseObject):
                 if "passives" in response:
                     hosts.update([_partition_node(h)
                                   for h in response["passives"]])
-            except (ConnectionFailure, socket.error), why:
+            except (ConnectionFailure, socket.error) as why:
                 if member:
                     member.pool.discard_socket(sock_info)
                 errors.append("%s:%d: %s" % (node[0], node[1], str(why)))
@@ -836,7 +836,7 @@ class ReplicaSetConnection(common.BaseObject):
                     ismaster_response=res,
                     ping_time=ping_time,
                     connection_pool=connection_pool)
-        except (ConnectionFailure, socket.error), why:
+        except (ConnectionFailure, socket.error) as why:
             if member:
                 member.pool.discard_socket(sock_info)
             raise ConnectionFailure("%s:%d: %s" % (host[0], host[1], str(why)))
@@ -872,7 +872,7 @@ class ReplicaSetConnection(common.BaseObject):
             try:
                 self.__writer = self.__check_is_primary(candidate)
                 return self.__members[self.__writer]
-            except (ConnectionFailure, socket.error), why:
+            except (ConnectionFailure, socket.error) as why:
                 errors.append(str(why))
         # Couldn't find the primary.
         raise AutoReconnect(', '.join(errors))
@@ -1030,7 +1030,7 @@ class ReplicaSetConnection(common.BaseObject):
         except OperationFailure:
             member.pool.maybe_return_socket(sock_info)
             raise
-        except(ConnectionFailure, socket.error), why:
+        except(ConnectionFailure, socket.error) as why:
             member.pool.discard_socket(sock_info)
             if _connection_to_use in (None, -1):
                 self.disconnect()
@@ -1058,7 +1058,7 @@ class ReplicaSetConnection(common.BaseObject):
             member.pool.maybe_return_socket(sock_info)
 
             return response
-        except (ConnectionFailure, socket.error), why:
+        except (ConnectionFailure, socket.error) as why:
             host, port = member.pool.pair
             member.pool.discard_socket(sock_info)
             raise AutoReconnect("%s:%d: %s" % (host, port, str(why)))
@@ -1129,7 +1129,7 @@ class ReplicaSetConnection(common.BaseObject):
                 return (
                     pinned_member.host,
                     self.__try_read(pinned_member, msg, **kwargs))
-            except AutoReconnect, why:
+            except AutoReconnect as why:
                 if _must_use_master or mode == ReadPreference.PRIMARY:
                     self.disconnect()
                     raise
@@ -1139,7 +1139,7 @@ class ReplicaSetConnection(common.BaseObject):
         # No pinned member, or pinned member down or doesn't match read pref
         self.__unpin_host()
 
-        members = self.__members.copy().values()
+        members = list(self.__members.copy().values())
 
         while len(errors) < MAX_RETRY:
             member = select_member(
@@ -1162,7 +1162,7 @@ class ReplicaSetConnection(common.BaseObject):
                     # Keep reading from this member in this thread / greenlet
                     self.__pin_host(member.host)
                 return member.host, response
-            except AutoReconnect, why:
+            except AutoReconnect as why:
                 errors.append(str(why))
                 members.remove(member)
 
@@ -1207,7 +1207,7 @@ class ReplicaSetConnection(common.BaseObject):
            The :class:`~pymongo.pool.Request` return value.
            :meth:`start_request` previously returned None
         """
-        for member in self.__members.values():
+        for member in list(self.__members.values()):
             member.pool.start_request()
 
         self.__in_request = True
@@ -1234,7 +1234,7 @@ class ReplicaSetConnection(common.BaseObject):
         in the middle of a sequence of operations in which ordering is
         important. This could lead to unexpected results.
         """
-        for member in self.__members.values():
+        for member in list(self.__members.values()):
             member.pool.end_request()
 
         self.__in_request = False
@@ -1280,7 +1280,7 @@ class ReplicaSetConnection(common.BaseObject):
         :Parameters:
           - `cursor_id`: id of cursor to close
         """
-        if not isinstance(cursor_id, (int, long)):
+        if not isinstance(cursor_id, int):
             raise TypeError("cursor_id must be an instance of (int, long)")
 
         self._send_message(message.kill_cursors([cursor_id]),
@@ -1312,9 +1312,9 @@ class ReplicaSetConnection(common.BaseObject):
         if isinstance(name, database.Database):
             name = name.name
 
-        if not isinstance(name, basestring):
+        if not isinstance(name, str):
             raise TypeError("name_or_database must be an instance of "
-                            "%s or Database" % (basestring.__name__,))
+                            "%s or Database" % (str.__name__,))
 
         self._purge_index(name)
         self[name].command("dropDatabase")
@@ -1344,12 +1344,12 @@ class ReplicaSetConnection(common.BaseObject):
         .. note:: Specifying `username` and `password` requires server
            version **>= 1.3.3+**.
         """
-        if not isinstance(from_name, basestring):
+        if not isinstance(from_name, str):
             raise TypeError("from_name must be an instance "
-                            "of %s" % (basestring.__name__,))
-        if not isinstance(to_name, basestring):
+                            "of %s" % (str.__name__,))
+        if not isinstance(to_name, str):
             raise TypeError("to_name must be an instance "
-                            "of %s" % (basestring.__name__,))
+                            "of %s" % (str.__name__,))
 
         database._check_name(to_name)
 

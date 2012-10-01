@@ -41,9 +41,9 @@ if PY3:
 
 else:
     try:
-        from cStringIO import StringIO
+        from io import StringIO
     except ImportError:
-        from StringIO import StringIO
+        from io import StringIO
 
     def b(s):
         # See comments above. In python 2.x b('foo') is just 'foo'.
@@ -55,6 +55,6 @@ else:
     binary_type = str
     # 2to3 will convert this to "str". That's okay
     # since we won't ever get here under python3.
-    text_type   = unicode
+    text_type   = str
 
 string_types = (binary_type, text_type)

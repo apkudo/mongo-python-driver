@@ -15,7 +15,7 @@
 
 """Tools to parse and validate a MongoDB URI."""
 
-from urllib import unquote_plus
+from urllib.parse import unquote_plus
 
 from pymongo.common import validate
 from pymongo.errors import (ConfigurationError,
@@ -132,7 +132,7 @@ def parse_host(entity, default_port=DEFAULT_PORT):
                                      "address literal must be enclosed in '[' "
                                      "and ']' according to RFC 2732.")
         host, port = host.split(':', 1)
-    if isinstance(port, basestring):
+    if isinstance(port, str):
         if not port.isdigit():
             raise ConfigurationError("Port number must be an integer.")
         port = int(port)
@@ -147,7 +147,7 @@ def validate_options(opts):
         - `opts`: A dict of MongoDB URI options.
     """
     normalized = {}
-    for option, value in opts.iteritems():
+    for option, value in opts.items():
         option, value = validate(option, value)
         normalized[option] = value
     return normalized
@@ -277,7 +277,7 @@ if __name__ == '__main__':
     import sys
     try:
         pprint.pprint(parse_uri(sys.argv[1]))
-    except (InvalidURI, UnsupportedOption), e:
-        print e
+    except (InvalidURI, UnsupportedOption) as e:
+        print(e)
     sys.exit(0)
 

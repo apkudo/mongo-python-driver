@@ -174,7 +174,7 @@ class BasePool:
                 sock.settimeout(self.conn_timeout or 20.0)
                 sock.connect(sa)
                 return sock
-            except socket.error, e:
+            except socket.error as e:
                 err = e
                 if sock is not None:
                     sock.close()
@@ -399,7 +399,7 @@ class BasePool:
         for sock_info in self.sockets:
             sock_info.close()
 
-        for request_sock in self._tid_to_sock.values():
+        for request_sock in list(self._tid_to_sock.values()):
             if request_sock not in (NO_REQUEST, NO_SOCKET_YET):
                 request_sock.close()
 

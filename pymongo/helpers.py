@@ -41,7 +41,7 @@ def _index_list(key_or_list, direction=None):
     if direction is not None:
         return [(key_or_list, direction)]
     else:
-        if isinstance(key_or_list, basestring):
+        if isinstance(key_or_list, str):
             return [(key_or_list, pymongo.ASCENDING)]
         elif not isinstance(key_or_list, list):
             raise TypeError("if no direction is specified, "
@@ -57,7 +57,7 @@ def _index_document(index_list):
     if isinstance(index_list, dict):
         raise TypeError("passing a dict to sort/create_index/hint is not "
                         "allowed - use a list of tuples instead. did you "
-                        "mean %r?" % list(index_list.iteritems()))
+                        "mean %r?" % list(index_list.items()))
     elif not isinstance(index_list, list):
         raise TypeError("must use a list of (key, direction) pairs, "
                         "not: " + repr(index_list))
@@ -66,7 +66,7 @@ def _index_document(index_list):
 
     index = SON()
     for (key, value) in index_list:
-        if not isinstance(key, basestring):
+        if not isinstance(key, str):
             raise TypeError("first item in each key pair must be a string")
         if value not in [pymongo.ASCENDING, pymongo.DESCENDING, pymongo.GEO2D, pymongo.GEOHAYSTACK]:
             raise TypeError("second item in each key pair must be ASCENDING, "
@@ -123,7 +123,7 @@ def _check_command_response(response, reset, msg="%s", allowable_errors=[]):
         # Mongos returns the error details in a 'raw' object
         # for some errors.
         if "raw" in response:
-            for shard in response["raw"].itervalues():
+            for shard in response["raw"].values():
                 if not shard.get("ok"):
                     # Just grab the first error...
                     details = shard
@@ -147,17 +147,17 @@ def _check_command_response(response, reset, msg="%s", allowable_errors=[]):
 def _password_digest(username, password):
     """Get a password digest to use for authentication.
     """
-    if not isinstance(password, basestring):
+    if not isinstance(password, str):
         raise TypeError("password must be an instance "
-                        "of %s" % (basestring.__name__,))
-    if not isinstance(username, basestring):
+                        "of %s" % (str.__name__,))
+    if not isinstance(username, str):
         raise TypeError("username must be an instance "
-                        "of %s" % (basestring.__name__,))
+                        "of %s" % (str.__name__,))
 
     md5hash = _md5func()
     data = "%s:mongo:%s" % (username, password)
     md5hash.update(data.encode('utf-8'))
-    return unicode(md5hash.hexdigest())
+    return str(md5hash.hexdigest())
 
 
 def _auth_key(nonce, username, password):
@@ -165,9 +165,9 @@ def _auth_key(nonce, username, password):
     """
     digest = _password_digest(username, password)
     md5hash = _md5func()
-    data = "%s%s%s" % (nonce, unicode(username), digest)
+    data = "%s%s%s" % (nonce, str(username), digest)
     md5hash.update(data.encode('utf-8'))
-    return unicode(md5hash.hexdigest())
+    return str(md5hash.hexdigest())
 
 
 def _fields_list_to_dict(fields):
@@ -181,9 +181,9 @@ def _fields_list_to_dict(fields):
     """
     as_dict = {}
     for field in fields:
-        if not isinstance(field, basestring):
+        if not isinstance(field, str):
             raise TypeError("fields must be a list of key names, "
-                            "each an instance of %s" % (basestring.__name__,))
+                            "each an instance of %s" % (str.__name__,))
         as_dict[field] = 1
     return as_dict
 

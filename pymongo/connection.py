@@ -202,7 +202,7 @@ class Connection(common.BaseObject):
         """
         if host is None:
             host = self.HOST
-        if isinstance(host, basestring):
+        if isinstance(host, str):
             host = [host]
         if port is None:
             port = self.PORT
@@ -238,7 +238,7 @@ class Connection(common.BaseObject):
         self.__is_primary = False
         self.__is_mongos = False
 
-        for option, value in kwargs.iteritems():
+        for option, value in kwargs.items():
             option, value = common.validate(option, value)
             options[option] = value
 
@@ -390,7 +390,7 @@ class Connection(common.BaseObject):
         this database is authenticated, since this gives global access.
         """
         authset = sock_info.authset
-        names = set(self.__auth_credentials.iterkeys())
+        names = set(self.__auth_credentials.keys())
 
         # Logout from any databases no longer listed in the credentials cache.
         for dbname in authset - names:
@@ -650,7 +650,7 @@ class Connection(common.BaseObject):
                     raise ConfigurationError("Seed list cannot contain a mix "
                                              "of mongod and mongos instances.")
                 return node
-            except Exception, why:
+            except Exception as why:
                 errors.append(str(why))
 
         # If we have a mongos seed list, pick the "nearest" member.
@@ -665,7 +665,7 @@ class Connection(common.BaseObject):
                 self.__is_primary = ismaster
                 self.__is_mongos = isdbgrid
                 return node
-            except Exception, why:
+            except Exception as why:
                 errors.append(str(why))
         # Couldn't find a suitable host.
         self.disconnect()
@@ -684,7 +684,7 @@ class Connection(common.BaseObject):
                 self.start_request()
 
             sock_info = self.__pool.get_socket((host, port))
-        except socket.error, why:
+        except socket.error as why:
             self.disconnect()
             raise AutoReconnect("could not connect to "
                                 "%s:%d: %s" % (host, port, str(why)))
@@ -841,7 +841,7 @@ class Connection(common.BaseObject):
         except OperationFailure:
             self.__pool.maybe_return_socket(sock_info)
             raise
-        except (ConnectionFailure, socket.error), e:
+        except (ConnectionFailure, socket.error) as e:
             self.disconnect()
             raise AutoReconnect(str(e))
         except:
@@ -906,7 +906,7 @@ class Connection(common.BaseObject):
                 if "network_timeout" in kwargs:
                     sock_info.sock.settimeout(kwargs["network_timeout"])
                 return self.__send_and_receive(message, sock_info)
-            except (ConnectionFailure, socket.error), e:
+            except (ConnectionFailure, socket.error) as e:
                 self.disconnect()
                 raise AutoReconnect(str(e))
         finally:
@@ -1019,7 +1019,7 @@ class Connection(common.BaseObject):
         .. seealso:: :meth:`set_cursor_manager` and
            the :mod:`~pymongo.cursor_manager` module
         """
-        if not isinstance(cursor_id, (int, long)):
+        if not isinstance(cursor_id, int):
             raise TypeError("cursor_id must be an instance of (int, long)")
 
         self.__cursor_manager.close(cursor_id)
@@ -1063,9 +1063,9 @@ class Connection(common.BaseObject):
         if isinstance(name, database.Database):
             name = name.name
 
-        if not isinstance(name, basestring):
+        if not isinstance(name, str):
             raise TypeError("name_or_database must be an instance of "
-                            "%s or Database" % (basestring.__name__,))
+                            "%s or Database" % (str.__name__,))
 
         self._purge_index(name)
         self[name].command("dropDatabase")
@@ -1097,12 +1097,12 @@ class Connection(common.BaseObject):
 
         .. versionadded:: 1.5
         """
-        if not isinstance(from_name, basestring):
+        if not isinstance(from_name, str):
             raise TypeError("from_name must be an instance "
-                            "of %s" % (basestring.__name__,))
-        if not isinstance(to_name, basestring):
+                            "of %s" % (str.__name__,))
+        if not isinstance(to_name, str):
             raise TypeError("to_name must be an instance "
-                            "of %s" % (basestring.__name__,))
+                            "of %s" % (str.__name__,))
 
         database._check_name(to_name)
 
@@ -1175,5 +1175,5 @@ class Connection(common.BaseObject):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         raise TypeError("'Connection' object is not iterable")

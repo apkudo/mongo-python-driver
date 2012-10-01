@@ -69,13 +69,13 @@ class Database(common.BaseObject):
                              safe=connection.safe,
                              **(connection.get_lasterror_options()))
 
-        if not isinstance(name, basestring):
+        if not isinstance(name, str):
             raise TypeError("name must be an instance "
-                            "of %s" % (basestring.__name__,))
+                            "of %s" % (str.__name__,))
 
         _check_name(name)
 
-        self.__name = unicode(name)
+        self.__name = str(name)
         self.__connection = connection
 
         self.__incoming_manipulators = []
@@ -347,10 +347,10 @@ class Database(common.BaseObject):
         .. mongodoc:: commands
         """
 
-        if isinstance(command, basestring):
+        if isinstance(command, str):
             command = SON([(command, value)])
 
-        command_name = command.keys()[0]
+        command_name = list(command.keys())[0]
         must_use_master = kwargs.pop('_use_master', False)
         if command_name.lower() not in rp.secondary_ok_commands:
             must_use_master = True
@@ -415,13 +415,13 @@ class Database(common.BaseObject):
         if isinstance(name, Collection):
             name = name.name
 
-        if not isinstance(name, basestring):
+        if not isinstance(name, str):
             raise TypeError("name_or_collection must be an instance of "
-                            "%s or Collection" % (basestring.__name__,))
+                            "%s or Collection" % (str.__name__,))
 
         self.__connection._purge_index(self.__name, name)
 
-        self.command("drop", unicode(name), allowable_errors=["ns not found"])
+        self.command("drop", str(name), allowable_errors=["ns not found"])
 
     def validate_collection(self, name_or_collection,
                             scandata=False, full=False):
@@ -454,11 +454,11 @@ class Database(common.BaseObject):
         if isinstance(name, Collection):
             name = name.name
 
-        if not isinstance(name, basestring):
+        if not isinstance(name, str):
             raise TypeError("name_or_collection must be an instance of "
-                            "%s or Collection" % (basestring.__name__,))
+                            "%s or Collection" % (str.__name__,))
 
-        result = self.command("validate", unicode(name),
+        result = self.command("validate", str(name),
                               scandata=scandata, full=full)
 
         valid = True
@@ -469,7 +469,7 @@ class Database(common.BaseObject):
                 raise CollectionInvalid("%s invalid: %s" % (name, info))
         # Sharded results
         elif "raw" in result:
-            for repl, res in result["raw"].iteritems():
+            for repl, res in result["raw"].items():
                 if "result" in res:
                     info = res["result"]
                     if (info.find("exception") != -1 or
@@ -582,7 +582,7 @@ class Database(common.BaseObject):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         raise TypeError("'Database' object is not iterable")
 
     def add_user(self, name, password, read_only=False):
@@ -668,12 +668,12 @@ class Database(common.BaseObject):
 
         .. mongodoc:: authenticate
         """
-        if not isinstance(name, basestring):
+        if not isinstance(name, str):
             raise TypeError("name must be an instance "
-                            "of %s" % (basestring.__name__,))
-        if not isinstance(password, basestring):
+                            "of %s" % (str.__name__,))
+        if not isinstance(password, str):
             raise TypeError("password must be an instance "
-                            "of %s" % (basestring.__name__,))
+                            "of %s" % (str.__name__,))
 
         # So we can authenticate during a failover. The start_request()
         # call below will pin the host used for getnonce so we use the
@@ -689,11 +689,11 @@ class Database(common.BaseObject):
                                  read_preference=read_pref)["nonce"]
             key = helpers._auth_key(nonce, name, password)
             try:
-                self.command("authenticate", user=unicode(name),
+                self.command("authenticate", user=str(name),
                              nonce=nonce, key=key, read_preference=read_pref)
                 self.connection._cache_credentials(self.name,
-                                                   unicode(name),
-                                                   unicode(password))
+                                                   str(name),
+                                                   str(password))
                 return True
             except OperationFailure:
                 return False

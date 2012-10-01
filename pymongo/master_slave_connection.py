@@ -183,7 +183,7 @@ class MasterSlaveConnection(BaseObject):
 
         # Iterate through the slaves randomly until we have success. Raise
         # reconnect if they all fail.
-        for connection_id in helpers.shuffled(xrange(len(self.__slaves))):
+        for connection_id in helpers.shuffled(range(len(self.__slaves))):
             try:
                 slave = self.__slaves[connection_id]
                 return (connection_id,
@@ -274,7 +274,7 @@ class MasterSlaveConnection(BaseObject):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         raise TypeError("'MasterSlaveConnection' object is not iterable")
 
     def _cached(self, database_name, collection_name, index_name):

@@ -46,12 +46,12 @@ class DBRef(object):
 
         .. mongodoc:: dbrefs
         """
-        if not isinstance(collection, basestring):
+        if not isinstance(collection, str):
             raise TypeError("collection must be an "
-                            "instance of %s" % (basestring.__name__,))
-        if database is not None and not isinstance(database, basestring):
+                            "instance of %s" % (str.__name__,))
+        if database is not None and not isinstance(database, str):
             raise TypeError("database must be an "
-                            "instance of %s" % (basestring.__name__,))
+                            "instance of %s" % (str.__name__,))
 
         self.__collection = collection
         self.__id = id
@@ -107,7 +107,7 @@ class DBRef(object):
 
     def __repr__(self):
         extra = "".join([", %s=%r" % (k, v)
-                         for k, v in self.__kwargs.iteritems()])
+                         for k, v in self.__kwargs.items()])
         if self.database is None:
             return "DBRef(%r, %r%s)" % (self.collection, self.id, extra)
         return "DBRef(%r, %r, %r%s)" % (self.collection, self.id,
